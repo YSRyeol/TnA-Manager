@@ -1,4 +1,5 @@
-import openpyxl
+from openpyxl import load_workbook, Workbook
+from openpyxl.styles import Alignment, Border, PatternFill, Side
 import traceback
 
 class ExcelManager():
@@ -23,7 +24,7 @@ class ExcelManager():
             (Error Message)
         """
         try:
-            self.WB = openpyxl.load_workbook(f'Excel/{self.FNAME}.xlsx')
+            self.WB = load_workbook(f'Excel/{self.FNAME}.xlsx')
             resultCheck = self.checkEmpList(self.WB.active)
             if resultCheck is not None:
                 return resultCheck
@@ -39,7 +40,7 @@ class ExcelManager():
             (Error Message)
         """
         try:
-            self.WB = openpyxl.Workbook()
+            self.WB = Workbook()
             self.WB.active.title = 'Statistics'
             resultInit = self.initStatistics()
             if resultInit is not None:
@@ -140,15 +141,15 @@ class ExcelManager():
             ws = self.WB.active
 
             ## 이름, 근무지 입력
-            ws.cell(row=3, column=2, value='이름').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            ws.cell(row=3, column=3, value='근무지').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            ws.cell(row=3, column=2, value='이름').alignment = Alignment(horizontal='center', vertical='center')
+            ws.cell(row=3, column=3, value='근무지').alignment = Alignment(horizontal='center', vertical='center')
             for i, emp in enumerate(self.EMP_LIST):
                 row = 3 * i + 4
                 ws.merge_cells(start_row=row, end_row=row+2, start_column=2, end_column=2)
-                ws.cell(row=row, column=2, value=emp).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-                ws.cell(row=row, column=3, value='본사').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-                ws.cell(row=row+1, column=3, value=400).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-                ws.cell(row=row+2, column=3, value='어비리').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+                ws.cell(row=row, column=2, value=emp).alignment = Alignment(horizontal='center', vertical='center')
+                ws.cell(row=row, column=3, value='본사').alignment = Alignment(horizontal='center', vertical='center')
+                ws.cell(row=row+1, column=3, value=400).alignment = Alignment(horizontal='center', vertical='center')
+                ws.cell(row=row+2, column=3, value='어비리').alignment = Alignment(horizontal='center', vertical='center')
             
             ws.freeze_panes = 'D4'
         except Exception as e:
@@ -169,24 +170,26 @@ class ExcelManager():
             if last_day is None:
                 raise Exception('Need to Last Day(last_day) Parameter')
 
+            thin = Side(border_style='thin')
+
             ## 출퇴근 시각 칼럼 저장
             whTimeCells = [3 + 5 * n for n in range(last_day)]
 
             ## 이름, 근무지 입력
-            self.WS.cell(row=3, column=2, value='이름').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            self.WS.cell(row=3, column=3, value='근무지').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            self.WS.cell(row=3, column=2, value='이름').alignment = Alignment(horizontal='center', vertical='center')
+            self.WS.cell(row=3, column=3, value='근무지').alignment = Alignment(horizontal='center', vertical='center')
             for i, emp in enumerate(self.EMP_LIST):
                 row = 3 * i + 4
                 self.WS.merge_cells(start_row=row, end_row=row+2, start_column=2, end_column=2)
-                self.WS.cell(row=row, column=2, value=emp).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-                self.WS.cell(row=row, column=3, value='본사').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-                self.WS.cell(row=row+1, column=3, value=400).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-                self.WS.cell(row=row+2, column=3, value='어비리').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+                self.WS.cell(row=row, column=2, value=emp).alignment = Alignment(horizontal='center', vertical='center')
+                self.WS.cell(row=row, column=3, value='본사').alignment = Alignment(horizontal='center', vertical='center')
+                self.WS.cell(row=row+1, column=3, value=400).alignment = Alignment(horizontal='center', vertical='center')
+                self.WS.cell(row=row+2, column=3, value='어비리').alignment = Alignment(horizontal='center', vertical='center')
 
             ## 셀 병합, 날짜 입력, 요일에 따른 배경 색 적용, 칼럼 입력
             columns = ['출퇴근 시각', '근무 시각', '근무 시간', '잔업 시간', '특근 시간']
-            satBG = openpyxl.styles.PatternFill(start_color='00BDD7EE', end_color='00BDD7EE', fill_type='solid')
-            sunBG = openpyxl.styles.PatternFill(start_color='00F8CBAD', end_color='00F8CBAD', fill_type='solid')
+            satBG = PatternFill(start_color='00BDD7EE', end_color='00BDD7EE', fill_type='solid')
+            sunBG = PatternFill(start_color='00F8CBAD', end_color='00F8CBAD', fill_type='solid')
             for n in whTimeCells:
                 day = whTimeCells.index(n) + 1
                 n += 1
@@ -194,15 +197,19 @@ class ExcelManager():
                 weekday = datetime.date(int(self.FNAME), int(self.WS.title), day).weekday()
 
                 self.WS.merge_cells(start_row=2, end_row=2, start_column=n, end_column=n + 4)
-                self.WS.cell(row=2, column=n, value=day).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+                self.WS.cell(row=2, column=n, value=day).alignment = Alignment(horizontal='center', vertical='center')
                 if weekday == 5 or weekday == 6:
                     self.WS.cell(row=2, column=n).fill = satBG if weekday == 5 else sunBG
                 for cell, column in zip(self.WS[3][n - 1:n + 4], columns):
-                    cell.alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
                     cell.value = column
                 
                 for i, emp in enumerate(self.EMP_LIST):
                     self.WS.merge_cells(start_row=3 * i + 4, end_row=3 * i + 6, start_column=n, end_column=n)
+                    
+                for row in self.WS.iter_rows(min_row=2, max_row=self.WS.max_row, min_col=n+4, max_col=n+4):
+                    for col in row:
+                        col.border = Border(right=thin)
 
             ## 셀 너비 초기화
             for col in whTimeCells:
@@ -232,19 +239,24 @@ class ExcelManager():
             month = int(self.WS.title)
             coln = month * 3 + 1
             ws = self.WB.active
+            thin = Side(border_style='thin')
 
             ## 셀 병합, 월 입력, 칼럼 입력
             ws.merge_cells(start_row=2, end_row=2, start_column=coln, end_column=coln+2)
-            ws.cell(row=2, column=coln, value=int(self.WS.title)).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            ws.cell(row=3, column=coln, value='근무 시간').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            ws.cell(row=3, column=coln+1, value='잔업 시간').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-            ws.cell(row=3, column=coln+2, value='특근 시간').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            ws.cell(row=2, column=coln, value=int(self.WS.title)).alignment = Alignment(horizontal='center', vertical='center')
+            ws.cell(row=3, column=coln, value='근무 시간').alignment = Alignment(horizontal='center', vertical='center')
+            ws.cell(row=3, column=coln+1, value='잔업 시간').alignment = Alignment(horizontal='center', vertical='center')
+            ws.cell(row=3, column=coln+2, value='특근 시간').alignment = Alignment(horizontal='center', vertical='center')
 
             ## 수식 입력
             for row in ws.iter_rows(min_row=4, max_row=len(self.EMP_LIST)*3+3, min_col=coln, max_col=coln+2):
                 for col in row:
-                    col.alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+                    col.alignment = Alignment(horizontal='center', vertical='center')
                     col.value = '=IFERROR(SUMIF(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$D$3:"&ADDRESS(3,COUNTA(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$3:$3"))-2)),INDIRECT(ADDRESS(3,COLUMN())),OFFSET(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$A$1"),1+MATCH(INDIRECT(ADDRESS(ROW(),3)),INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$C$"&3+MATCH(INDIRECT(ADDRESS(IF(MOD(ROW(),3)=1,ROW(),IF(MOD(ROW(),3)=2,ROW()-1,ROW()-2)),2)),INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$B$4:$B$"&3*COUNTA(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$B:$B"))),0)&":$C$"&5+MATCH(INDIRECT(ADDRESS(IF(MOD(ROW(),3)=1,ROW(),IF(MOD(ROW(),3)=2,ROW()-1,ROW()-2)),2)),INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$B$4:$B$"&3*COUNTA(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$B:$B"))),0)))+MATCH(INDIRECT(ADDRESS(IF(MOD(ROW(),3)=1,ROW(),IF(MOD(ROW(),3)=2,ROW()-1,ROW()-2)),2)),INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$B$4:$B$"&3*COUNTA(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$B:$B"))),0),3,1,COUNTA(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$3:$3"))-2)), 0)'
+
+            for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=coln+2, max_col=coln+2):
+                for col in row:
+                    col.border = Border(right=thin)
         except Exception as e:
             return f'ExcelManager Error(addMonthInStatistics()):\n{traceback.format_exc()}'
 
@@ -328,7 +340,7 @@ class ExcelManager():
                 return indexDict[1]
 
             ## 출퇴근 시각
-            self.WS.cell(row=indexDict['name'], column=indexDict['day'], value=dataDict['totalWorking']).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            self.WS.cell(row=indexDict['name'], column=indexDict['day'], value=dataDict['totalWorking']).alignment = Alignment(horizontal='center', vertical='center')
             ## 근무 데이터
             for row in self.WS.iter_rows(min_row=indexDict['name'], max_row=indexDict['name']+2, min_col=indexDict['day']+1, max_col=indexDict['day']+4):
                 for col in row:
@@ -338,7 +350,7 @@ class ExcelManager():
                     columnName = 0 if columnName == '근무 시각' else 1 if columnName == '근무 시간' else 2 if columnName == '잔업 시간' else 3 if columnName == '특근 시간' else None
                     if placeName is None or columnName is None:
                         raise Exception('Not Exist Column')
-                    col.alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+                    col.alignment = Alignment(horizontal='center', vertical='center')
                     col.value = dataDict[placeName][columnName] if dataDict[placeName] is not None and dataDict[placeName][columnName] is not None else ''
         except Exception as e:
             return f'ExcelManager Error(inputData()):\n{traceback.format_exc()}'
@@ -398,15 +410,17 @@ class ExcelManager():
             if emp_list is None:
                 raise Exception('Need to Employee List(emp_list) Parameter')
 
+            thin = Side(border_style='thin')
+
             before_max_row = ws.max_row
             ## 시트 마지막에 직원 추가
             for i, emp in enumerate(emp_list):
                 row = 3 * i + before_max_row + 1
                 ws.merge_cells(start_row=row, end_row=row+2, start_column=2, end_column=2)
-                ws.cell(row=row, column=2, value=emp).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-                ws.cell(row=row, column=3, value='본사').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-                ws.cell(row=row+1, column=3, value=400).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-                ws.cell(row=row+2, column=3, value='어비리').alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+                ws.cell(row=row, column=2, value=emp).alignment = Alignment(horizontal='center', vertical='center')
+                ws.cell(row=row, column=3, value='본사').alignment = Alignment(horizontal='center', vertical='center')
+                ws.cell(row=row+1, column=3, value=400).alignment = Alignment(horizontal='center', vertical='center')
+                ws.cell(row=row+2, column=3, value='어비리').alignment = Alignment(horizontal='center', vertical='center')
             
             ## Statistics 시트일 경우 추가된 월 칼럼에 수식 추가
             if ws.title == 'Statistics':
@@ -425,14 +439,24 @@ class ExcelManager():
                         #### 수식 입력
                         for row in ws.iter_rows(min_row=before_max_row+1, max_row=len(emp_list)*3+before_max_row, min_col=coln, max_col=coln+2):
                             for col in row:
-                                col.alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+                                col.alignment = Alignment(horizontal='center', vertical='center')
                                 col.value = '=IFERROR(SUMIF(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$D$3:"&ADDRESS(3,COUNTA(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$3:$3"))-2)),INDIRECT(ADDRESS(3,COLUMN())),OFFSET(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$A$1"),1+MATCH(INDIRECT(ADDRESS(ROW(),3)),INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$C$"&3+MATCH(INDIRECT(ADDRESS(IF(MOD(ROW(),3)=1,ROW(),IF(MOD(ROW(),3)=2,ROW()-1,ROW()-2)),2)),INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$B$4:$B$"&3*COUNTA(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$B:$B"))),0)&":$C$"&5+MATCH(INDIRECT(ADDRESS(IF(MOD(ROW(),3)=1,ROW(),IF(MOD(ROW(),3)=2,ROW()-1,ROW()-2)),2)),INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$B$4:$B$"&3*COUNTA(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$B:$B"))),0)))+MATCH(INDIRECT(ADDRESS(IF(MOD(ROW(),3)=1,ROW(),IF(MOD(ROW(),3)=2,ROW()-1,ROW()-2)),2)),INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$B$4:$B$"&3*COUNTA(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$B:$B"))),0),3,1,COUNTA(INDIRECT(INDIRECT(ADDRESS(2,IF(MOD(COLUMN(),3)=1,COLUMN(),IF(MOD(COLUMN(),3)=2,COLUMN()-1,COLUMN()-2))))&"!$3:$3"))-2)), 0)'
+
+                        for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=coln+2, max_col=coln+2):
+                            for col in row:
+                                col.border = Border(right=thin)
             else:
                 for i in range(len(emp_list)):
                     row = 3 * i + before_max_row + 1
                     for j in range(4, ws.max_column + 1, 5):
                         ws.merge_cells(start_row=row, end_row=row+2, start_column=j, end_column=j)
-                        ws.cell(row=row, column=j).alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+                        ws.cell(row=row, column=j).alignment = Alignment(horizontal='center', vertical='center')
+
+                cols = [i for i in range(8, ws.max_column + 1, 5)]
+                for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=8, max_col=ws.max_column):
+                    for col in row:
+                        if col.column in cols:
+                            col.border = Border(right=thin)
         except Exception as e:
             return f'ExcelManager Error(addEmp()):\n{traceback.format_exc()}'
 

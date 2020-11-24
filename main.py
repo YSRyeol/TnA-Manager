@@ -477,6 +477,7 @@ class MainWindow(QWidget):
         launchPlace = 'hq' if curSTHq <= launchStart and curETHq >= launchEnd else '400' if curST400 <= launchStart and curET400 >= launchStart else 'eobiri' if curSTEobiri <= launchStart and curETEobiri >= launchStart else None
         isDinner = True if self.cbIsDinner.isChecked() and curSTHq <= totalWorkingTime.index('17:30') and curETHq >= totalWorkingTime.index('16:00') else False
         isHolyday = True if 5 <= datetime.date(int(year), int(month), int(day)).weekday() else False
+        earlyGoIndex = totalWorkingTime.index('08:00')
         overTimeIndex = totalWorkingTime.index('17:00')
         dataDict = {
             'name': self.cbName.currentText(),
@@ -485,19 +486,19 @@ class MainWindow(QWidget):
             'hq': [
                 f'{self.cbStartTimeHq.currentText()} - {self.cbEndTimeHq.currentText()}',
                 (curETHq - curSTHq - (2 if launchPlace == 'hq' else 0) - (1 if isDinner else 0)) * 0.5,
-                (curETHq - (overTimeIndex if overTimeIndex > curSTHq else curSTHq) - (1 if isDinner else 0)) * 0.5 if not isHolyday and curETHq > overTimeIndex else None,
+                ((earlyGoIndex - curSTHq if curSTHq < earlyGoIndex else 0) + curETHq - (overTimeIndex if overTimeIndex > curSTHq else curSTHq) - (1 if isDinner else 0)) * 0.5 if not isHolyday and curETHq > overTimeIndex else (earlyGoIndex - curSTHq) * 0.5 if not isHolyday and curSTHq < earlyGoIndex else None,
                 (curETHq - curSTHq - (2 if launchPlace == 'hq' else 0) - (1 if isDinner else 0)) * 0.5 if isHolyday else None
             ] if curSTHq else None,
             '400': [
                 f'{self.cbStartTime400.currentText()} - {self.cbEndTime400.currentText()}',
                 (curET400 - curST400 - (2 if launchPlace == '400' else 0)) * 0.5,
-                (curET400 - (overTimeIndex if overTimeIndex > curST400 else curST400)) * 0.5 if not isHolyday and curET400 > overTimeIndex else None,
+                ((earlyGoIndex - curST400 if curST400 < earlyGoIndex else 0) + curET400 - (overTimeIndex if overTimeIndex > curST400 else curST400)) * 0.5 if not isHolyday and curET400 > overTimeIndex else (earlyGoIndex - curST400) * 0.5 if not isHolyday and curST400 < earlyGoIndex else None,
                 (curET400 - curST400 - (2 if launchPlace == '400' else 0)) * 0.5 if isHolyday else None
             ] if curST400 else None,
             'eobiri': [
                 f'{self.cbStartTimeEobiri.currentText()} - {self.cbEndTimeEobiri.currentText()}',
                 (curETEobiri - curSTEobiri - (2 if launchPlace == 'eobiri' else 0)) * 0.5,
-                (curETEobiri - (overTimeIndex if overTimeIndex > curSTEobiri else curSTEobiri)) * 0.5 if not isHolyday and curETEobiri > overTimeIndex else None,
+                ((earlyGoIndex - curSTEobiri if curSTEobiri < earlyGoIndex else 0) + curETEobiri - (overTimeIndex if overTimeIndex > curSTEobiri else curSTEobiri)) * 0.5 if not isHolyday and curETEobiri > overTimeIndex else (earlyGoIndex - curSTEobiri) * 0.5 if not isHolyday and curSTEobiri < earlyGoIndex else None,
                 (curETEobiri - curSTEobiri - (2 if launchPlace == 'eobiri' else 0)) * 0.5 if isHolyday else None
             ] if curSTEobiri else None
         }
